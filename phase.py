@@ -10,6 +10,7 @@ from Utilities import *
 from MDUtilities import *
 import matplotlib.pyplot as plt
 import time
+import pickle
 
 # Create simulation Box. See design document for details.
 
@@ -29,6 +30,7 @@ stat_step = int(param.readline()) # "Time from which to calculate statistics:
 Tbegin, Tend, NTsteps = eval(param.readline()) 
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
 rhobegin, rhoend, Nrhosteps = eval(param.readline())
+resultfile = param.readline()[:-1] # Forget Newline
 
 TR_parameters = []
 
@@ -37,6 +39,13 @@ for T in np.linspace(Tbegin, Tend, NTsteps):
         TR_parameters.append( (T, R) )
 
 starttime = time.clock()
+
+RDFs = []
+RDFbins = []
+MSDs = []
+PostTs = []
+timess = []
+
 for T, R in TR_parameters:
     print("\nSimulating (T=%.3f,R=%.3f)"%(T,R))
     Simba = Box(Nparticles, lj_cutoff, R, T, True)
@@ -45,13 +54,31 @@ for T, R in TR_parameters:
     rdf_bins = np.arange(0,int(Simba.boxdim),0.1) # Creates RDF bins
 
     print("Calculating the Mean Square Displacement function")
-    MSD_arr = MSD(position_list[stat_start:-1:10], Simba.boxdim)
+    MSD_arr = MSD(position_list[stat_start:-1:stat_step], Simba.boxdim)
 
     print("Calculating the Radial Distribution function")
-    rdf_arr, rdf_bins = RDF(position_list[stat_step:-1:10], rdf_bins, Simba.boxdim)
+    rdf_arr, rdf_bins = RDF(position_list[stat_start:-1:stat_step], rdf_bins, Simba.boxdim)
     rdf_arr/=R
 
     KE = Simba.get_energies()[1]
-    print("Post Simulation Fitted Temperature: ", np.mean(KE)/(1.5*len(Simba.particles)))
+    PostT = np.mean(KE)/(1.5*len(Simba.particles))
+    print("Post Simulation Fitted Temperature: ", PostT)
+    
+    times = timelist[stat_start:-1:stat_step]
 
+    RDFs.append(rdf_arr)
+    RDFbins.append(rdf_bins)
+    MSDs.append(MSD_arr)
+    PostTs.append(PostTs)
+    timess.append(times)
+
+
+SAVE = {"RDF" : RDFs,
+        "RDFbins" : RDFbins,
+        "MSD" : MSDs,
+        "TR" : TR_parameters,
+        "PostT" : PostTs}
+
+print("Dumping Pickle")
+pickle.dump(SAVE, open(resultfile, 'wb'))
 print("Program ran for %.1f seconds"%(time.clock()-starttime))

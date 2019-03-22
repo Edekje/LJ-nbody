@@ -33,7 +33,7 @@ class Box:
             T - Initial temperature
             cpp - Boolean indicating C++ acceleration or not
         """
-        print("Box initialised with T=%f, number density=%f. \n"%(T, rho))
+        print("Box initialised with T=%f, number density=%f."%(T, rho))
         # Initialise list of particles with zero position and velocity
         # and label equal to their number
         self.particles = [Particle3D(str(i)) for i in range(1,N+1)]
@@ -207,7 +207,7 @@ class Box:
         """
         # Print simulation total runtime in seconds
         runtime = time.process_time() - starttime
-        print('Simulate method ran for %f seconds\n'%runtime)
+        print('Simulate method ran for %f seconds'%runtime)
 
 
         return np.array(positions), np.array(timelist)
