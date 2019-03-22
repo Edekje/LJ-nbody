@@ -18,7 +18,7 @@ def set_initial_positions(rho, particles):
     
     # Give warning if fcc lattice will not be fully occupied
     if 4*ndim**3 != natoms:
-        print("Atoms will not fill a fcc lattice completely.\n")
+        print("Atoms will not fill a fcc lattice completely.")
     
     # Separation between particles
     delta = box_size / ndim
@@ -46,8 +46,8 @@ def set_initial_positions(rho, particles):
                     i_atom += 1
     
     # Some output
-    print("{0:d} atoms placed on a face-centered cubic lattice.\n".format(natoms))
-    print("Box dimensions: {0:f} {0:f} {0:f}\n".format(box_size))
+    print("{0:d} atoms placed on a face-centered cubic lattice.".format(natoms))
+    print("Box dimensions: {0:f} {0:f} {0:f}".format(box_size))
     
     # Return the box size as Numpy array
     return np.array([box_size, box_size, box_size])
@@ -107,6 +107,6 @@ def set_initial_velocities(temp, particles):
         v0sq += xvt**2 + yvt**2 + zvt**2
     
     # Output
-    print("Temperature = {0:f}\n".format(temp))
-    print("Centre-of-mass velocity = {0:f} {1:f} {2:f}\n".format(xv0_tot/natoms, yv0_tot/natoms, zv0_tot/natoms))
+    print("Temperature = {0:f}".format(temp))
+    print("Centre-of-mass velocity = {0:f} {1:f} {2:f}".format(xv0_tot/natoms, yv0_tot/natoms, zv0_tot/natoms))
     

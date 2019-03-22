@@ -24,6 +24,7 @@ timestep = float(param.readline()) # Simulation timestep size
 
 lj_cutoff = float(param.readline()) # "Lennard-Jones cutoff distance: "
 stat_start = int(param.readline()) # "Time from which to calculate statistics:
+stat_step = int(param.readline()) # "Time from which to calculate statistics:
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
 Tbegin, Tend, NTsteps = eval(param.readline()) 
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
@@ -37,20 +38,20 @@ for T in np.linspace(Tbegin, Tend, NTsteps):
 
 starttime = time.clock()
 for T, R in TR_parameters:
-    print("Simulating (T=%.3f,R=%.3f)"%(T,R))
+    print("\nSimulating (T=%.3f,R=%.3f)"%(T,R))
     Simba = Box(Nparticles, lj_cutoff, R, T, True)
     position_list, timelist = Simba.simulate(Nstep, timestep)
 
     rdf_bins = np.arange(0,int(Simba.boxdim),0.1) # Creates RDF bins
 
-    print("Calculating the Mean Square Displacement function\n")
-    MSD_arr = MSD(position_list, stat_start, Nstep-1, Simba.boxdim)
+    print("Calculating the Mean Square Displacement function")
+    MSD_arr = MSD(position_list[stat_start:-1:10], Simba.boxdim)
 
-    print("Calculating the Radial Distribution function\n")
-    rdf_arr, rdf_bins = RDF(position_list, stat_start, Nstep-1, rdf_bins, Simba.boxdim)
+    print("Calculating the Radial Distribution function")
+    rdf_arr, rdf_bins = RDF(position_list[stat_step:-1:10], rdf_bins, Simba.boxdim)
     rdf_arr/=R
 
-
+    KE = Simba.get_energies()[1]
     print("Post Simulation Fitted Temperature: ", np.mean(KE)/(1.5*len(Simba.particles)))
 
 print("Program ran for %.1f seconds"%(time.clock()-starttime))

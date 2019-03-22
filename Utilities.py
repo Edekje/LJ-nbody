@@ -137,7 +137,7 @@ def Bin_particles(pos, bins, boxdim):
     return bin_entries
 
 
-def RDF(pos, start, end, bins, boxdim):
+def RDF(pos, bins, boxdim):
     """Given a [T, N,3]-dimensional narray of system positions indexed
     by time, this will calculate the radial density function histogram
     averaged from time start to end exclusive using the given bins.
@@ -150,7 +150,7 @@ def RDF(pos, start, end, bins, boxdim):
         radial_density_histogram - Values of RDF
         rdf_positions - Position at which RDF is evaluated
     """
-    data = [Bin_particles(cpos, bins, boxdim) for cpos in pos[start:end]]
+    data = [Bin_particles(cpos, bins, boxdim) for cpos in pos]
 
     radial_density_histogram = sum(data)/len(data)
     volumes = 4*np.pi*((bins[:-1]+bins[1:])/2)**2*(bins[1]-bins[0])
@@ -160,7 +160,7 @@ def RDF(pos, start, end, bins, boxdim):
     return radial_density_histogram, rdf_positions
 
 
-def MSD(pos, start, end, boxdim):
+def MSD(pos, boxdim):
     """Given a [T, N,3]-dimensional narray of system positions indexed
     by time, this will calculate the mean square displacement for the
     system from time start to end exclusive
@@ -173,9 +173,9 @@ def MSD(pos, start, end, boxdim):
         mean_square_displacement - Array of length lenght with MSD evaluated at those times
     """
 
-    in_pos = pos[start]
+    in_pos = pos[0]
     mean_square_displacement = []
-    for t in range(start, end+1):
+    for t in range(0, len(pos)):
         t_pos = pos[t]
         sum = 0
         for i in range(len(t_pos)):
