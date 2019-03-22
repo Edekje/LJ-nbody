@@ -154,7 +154,7 @@ class Box:
         return None
 
 
-    def simulate(self, outputfile, nsteps, dt):
+    def simulate(self, nsteps, dt):
         """
         Runs a Verlet n-body simulation on the initialised box for nsteps
         with timestep dt, and returns [nsteps,N,3]-dim position
@@ -170,30 +170,31 @@ class Box:
         starttime = time.process_time() # For simulation length timing purposes
         # Initialisation of all the lists used throughout simulations.
         timelist, VMD_list, positions, velocities = [], [], [], [];
-        KE, PE, TE = [], [], []
+        #KE, PE, TE = [], [], []
 
         # Calculate initial forces.
         forces = self.get_forces()
         for t in range(nsteps):
             positions.append(self.get_positions()) #Save position
-            self.enforce_pbc() # Enforce periodic boundary conditions.
+#           self.enforce_pbc() # Enforce periodic boundary conditions.
             velocities.append(self.get_velocities()) # Save velocities
             timelist.append(t*dt) # Save time stamp
+            """
             VMD_list.append(self.VMD_string(t)) # Save VMD data to temporary list
-
+            
             # Calculate and save energies in lists
             energies = self.get_energies()
             PE.append(energies[0])
             KE.append(energies[1])
             TE.append(energies[2])
-
+            """
             # Updates positions
             self.update_pos(forces, dt)
             temp_forces = forces
             forces = self.get_forces()
             # Update velocities
             self.update_vel(0.5*(temp_forces + forces), dt)
-
+        """
         # Output VMD data to file
         vmdstring = ''.join(VMD_list)
         with open(outputfile, 'w') as out:
@@ -203,7 +204,7 @@ class Box:
         # Output energy data to file
         write_output("energyfile.txt", timelist, PE, KE, TE)
         print('Successful Energies write to energyfile.txt \n')
-
+        """
         # Print simulation total runtime in seconds
         runtime = time.process_time() - starttime
         print('Simulate method ran for %f seconds\n'%runtime)
