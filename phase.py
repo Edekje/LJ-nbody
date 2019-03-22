@@ -18,12 +18,12 @@ print("LJ-Argon Phase Diagram Simulation.")
 filename = sys.argv[1]
 param = open(filename, 'r')
 
-Nstep = float(param.readline()) #"Number of timesteps per simulation"
-Nparticles = float(param.readline()) # Number of particles in simulation
+Nstep = int(param.readline()) #"Number of timesteps per simulation"
+Nparticles = int(param.readline()) # Number of particles in simulation
 timestep = float(param.readline()) # Simulation timestep size
 
 lj_cutoff = float(param.readline()) # "Lennard-Jones cutoff distance: "
-stat_start = float(param.readline()) # "Time from which to calculate statistics:
+stat_start = int(param.readline()) # "Time from which to calculate statistics:
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
 Tbegin, Tend, NTsteps = eval(param.readline()) 
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
@@ -35,24 +35,22 @@ for T in np.linspace(Tbegin, Tend, NTsteps):
     for R in np.linspace(rhobegin, rhoend, Nrhosteps):
         TR_parameters.append( (T, R) )
 
+starttime = time.clock()
 for T, R in TR_parameters:
-    Simba = Box(N, lj_cutoff, R, T, True)
+    print("Simulating (T=%.3f,R=%.3f)"%(T,R))
+    Simba = Box(Nparticles, lj_cutoff, R, T, True)
     position_list, timelist = Simba.simulate(Nstep, timestep)
 
-# Define MSD and RDF parameters
-msd_start = 7000 # Need something >= 1
-msd_end = 9999 # Need something > msd_start and < n_steps
-rdf_bins = np.arange(0,int(Simba.boxdim),0.1) # Creates RDF bins
-rdf_start = 9500 # Need > 0
-rdf_end = 9999 # Need < n_steps
+    rdf_bins = np.arange(0,int(Simba.boxdim),0.1) # Creates RDF bins
 
-print("Calculating the Mean Square Displacement function\n")
-MSD_arr = MSD(position_list, msd_start, msd_end, Simba.boxdim)
+    print("Calculating the Mean Square Displacement function\n")
+    MSD_arr = MSD(position_list, stat_start, Nstep-1, Simba.boxdim)
 
-print("Calculating the Radial Distribution function\n")
-rdf_arr, rdf_bins = RDF(position_list, rdf_start, rdf_end, rdf_bins, Simba.boxdim)
-rdf_arr/=parameters[1]
+    print("Calculating the Radial Distribution function\n")
+    rdf_arr, rdf_bins = RDF(position_list, stat_start, Nstep-1, rdf_bins, Simba.boxdim)
+    rdf_arr/=R
 
 
-print("Post Simulation Fitted Temperature: ", np.mean(KE)/(1.5*len(Simba.particles)))
-"""
+    print("Post Simulation Fitted Temperature: ", np.mean(KE)/(1.5*len(Simba.particles)))
+
+print("Program ran for %.1f seconds"%(time.clock()-starttime))
