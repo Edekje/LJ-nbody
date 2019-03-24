@@ -29,36 +29,28 @@ stat_step = int(param.readline()) # "Time from which to calculate statistics:
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
 Tbegin, Tend, NTsteps = eval(param.readline()) 
 # "Input start temperature, end temperature, and number of steps as a tuple (S,E,N)"
-rhobegin, rhoend, Nrhosteps = eval(param.readline())
+Vbegin, Vend, NVsteps = eval(param.readline())
 resultfile = param.readline()[:-1] # Forget Newline
 
-TR_parameters = []
+TV_parameters = []
 
-for T in np.linspace(Tbegin, Tend, NTsteps-1):
-    for R in np.linspace(rhobegin, rhoend, Nrhosteps-1):
-        TR_parameters.append( (T, R) )
+for T in np.linspace(Tbegin, Tend, NTsteps):
+    for V in np.linspace(Vbegin, Vend, NVsteps):
+        TV_parameters.append( (T, V) )
 
 starttime = time.clock()
 
-RDFs = []
-RDFbins = []
 MSDs = []
 PostTs = []
 timess = []
 
-for T, R in TR_parameters:
-    print("\nSimulating (T=%.3f,R=%.3f)"%(T,R))
-    Simba = Box(Nparticles, lj_cutoff, R, T, True)
+for T, V in TV_parameters:
+    print("\nSimulating (T=%.3f,R=%.3f)"%(T,V))
+    Simba = Box(Nparticles, lj_cutoff, 1/V, T, True)
     position_list, timelist = Simba.simulate(Nstep, timestep)
-
-    rdf_bins = np.arange(0,int(Simba.boxdim),0.1) # Creates RDF bins
 
     print("Calculating the Mean Square Displacement function")
     MSD_arr = MSD(position_list[stat_start:-1:stat_step], Simba.boxdim)
-
-    print("Calculating the Radial Distribution function")
-    rdf_arr, rdf_bins = RDF(position_list[stat_start:-1:stat_step], rdf_bins, Simba.boxdim)
-    rdf_arr/=R
 
     KE = Simba.get_energies()[1]
     PostT = np.mean(KE)/(1.5*len(Simba.particles))
@@ -66,17 +58,13 @@ for T, R in TR_parameters:
     
     times = timelist[stat_start:-1:stat_step]
 
-    RDFs.append(rdf_arr)
-    RDFbins.append(rdf_bins)
     MSDs.append(MSD_arr)
     PostTs.append(PostTs)
     timess.append(times)
 
 
-SAVE = {"RDF" : RDFs,
-        "RDFbins" : RDFbins,
-        "MSD" : MSDs,
-        "TR" : TR_parameters,
+SAVE = {"MSD" : MSDs,
+        "TV" : TV_parameters,
         "PostT" : PostTs}
 
 print("Dumping Pickle")
