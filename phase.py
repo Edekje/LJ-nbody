@@ -34,8 +34,8 @@ resultfile = param.readline()[:-1] # Forget Newline
 
 TR_parameters = []
 
-for T in np.linspace(Tbegin, Tend, NTsteps):
-    for R in np.linspace(rhobegin, rhoend, Nrhosteps):
+for T in np.linspace(Tbegin, Tend, NTsteps-1):
+    for R in np.linspace(rhobegin, rhoend, Nrhosteps-1):
         TR_parameters.append( (T, R) )
 
 starttime = time.clock()
